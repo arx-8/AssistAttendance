@@ -1,5 +1,7 @@
-import java.io.{ByteArrayOutputStream, InputStream}
-import java.net.InetSocketAddress
+import java.io.{BufferedReader, ByteArrayOutputStream, InputStream, InputStreamReader}
+import java.net.{InetSocketAddress, URLDecoder}
+import java.nio.charset.StandardCharsets
+import java.time.LocalDateTime
 import java.util.concurrent.Executors
 
 import com.sun.net.httpserver.{HttpExchange, HttpHandler, HttpServer}
@@ -29,11 +31,26 @@ object App {
         exchange.getResponseBody.close()
       }
     })
+    // index/do
+    server.createContext("/index/do", new HttpHandler {
+      override def handle(exchange: HttpExchange): Unit = {
+        val isr = new InputStreamReader(exchange.getRequestBody, StandardCharsets.UTF_8)
+        val br = new BufferedReader(isr)
+        val query = br.readLine()
+        val params = parseQuery(query)
+
+        // TODO
+        val resp = params.toString()
+
+        exchange.sendResponseHeaders(200, resp.length)
+        exchange.getResponseBody.write(resp.getBytes())
+        exchange.getResponseBody.close()
+      }
+    })
 
     server.start()
-    println("running...")
+    println(LocalDateTime.now().toString + " server stand up")
   }
-
 
   def convertByteArray(is: InputStream): Array[Byte] = {
     val os = new ByteArrayOutputStream()
@@ -51,4 +68,22 @@ object App {
     null
   }
 
+  def parseQuery(query: String): Map[String, String] = {
+    if (query == null) {
+      return Map.empty[String, String]
+    }
+
+    val params = Map.newBuilder[String, String]
+    val pairs = query.split("[&]")
+    pairs
+      .filter(1 < _.split("[=]").length)
+      .foreach(pair => {
+        val param = pair.split("[=]")
+        val key = URLDecoder.decode(param(0), System.getProperty("file.encoding"))
+        val value = URLDecoder.decode(param(1), System.getProperty("file.encoding"))
+        // TODO key重複考慮。とりま必要ないので省略。
+        params += (key -> value)
+      })
+    params.result()
+  }
 }
