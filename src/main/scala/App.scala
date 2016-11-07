@@ -16,11 +16,10 @@ object App {
     // redirect invalid url
     server.createContext("/", new HttpHandler {
       override def handle(exchange: HttpExchange): Unit = {
-        exchange.getResponseHeaders.add("Location", "/index/")
-        exchange.sendResponseHeaders(301, 0)
-        exchange.getResponseBody.close()
+        redirectToIndex(exchange)
       }
     })
+
     // index
     val url = getClass.getClassLoader.getResource("index.html")
     server.createContext("/index/", new HttpHandler {
@@ -31,6 +30,7 @@ object App {
         exchange.getResponseBody.close()
       }
     })
+
     // index/do
     server.createContext("/index/do", new HttpHandler {
       override def handle(exchange: HttpExchange): Unit = {
@@ -39,17 +39,29 @@ object App {
         val query = br.readLine()
         val params = parseQuery(query)
 
-        // TODO
-        val resp = params.toString()
+        params.get("btn") match {
+          case Some(value) =>
+            value match {
+              // TODO 出社
+              case "start" => println("this is start")
+              // TODO 退社
+              case "quit" => println("this is quit")
+            }
+          case None =>
+        }
 
-        exchange.sendResponseHeaders(200, resp.length)
-        exchange.getResponseBody.write(resp.getBytes())
-        exchange.getResponseBody.close()
+        redirectToIndex(exchange)
       }
     })
 
     server.start()
     println(LocalDateTime.now().toString + " server stand up")
+  }
+
+  def redirectToIndex(exchange: HttpExchange): Unit = {
+    exchange.getResponseHeaders.add("Location", "/index/")
+    exchange.sendResponseHeaders(301, 0)
+    exchange.getResponseBody.close()
   }
 
   def convertByteArray(is: InputStream): Array[Byte] = {
