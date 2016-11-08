@@ -7,6 +7,7 @@ import java.util.concurrent.Executors
 import com.sun.net.httpserver.{HttpExchange, HttpHandler, HttpServer}
 
 object App {
+  val URL_INDEX = getClass.getClassLoader.getResource("index.html")
 
   def main(args: Array[String]): Unit = {
     val server = HttpServer.create(new InetSocketAddress("localhost", 5000), 5000)
@@ -21,10 +22,9 @@ object App {
     })
 
     // index
-    val url = getClass.getClassLoader.getResource("index.html")
     server.createContext("/index/", new HttpHandler {
       override def handle(exchange: HttpExchange): Unit = {
-        val buf = convertByteArray(url.openStream())
+        val buf = convertByteArray(URL_INDEX.openStream())
         exchange.sendResponseHeaders(200, buf.length)
         exchange.getResponseBody.write(buf)
         exchange.getResponseBody.close()
@@ -47,7 +47,7 @@ object App {
               // TODO 退社
               case "quit" => println("this is quit")
             }
-          case None =>
+          case None => // none
         }
 
         redirectToIndex(exchange)
@@ -58,13 +58,13 @@ object App {
     println(LocalDateTime.now().toString + " server stand up")
   }
 
-  def redirectToIndex(exchange: HttpExchange): Unit = {
+  private def redirectToIndex(exchange: HttpExchange): Unit = {
     exchange.getResponseHeaders.add("Location", "/index/")
     exchange.sendResponseHeaders(301, 0)
     exchange.getResponseBody.close()
   }
 
-  def convertByteArray(is: InputStream): Array[Byte] = {
+  private def convertByteArray(is: InputStream): Array[Byte] = {
     val os = new ByteArrayOutputStream()
     // TODO byte固定長で大丈夫なの？
     val buffer = new Array[Byte](1024)
@@ -80,7 +80,7 @@ object App {
     null
   }
 
-  def parseQuery(query: String): Map[String, String] = {
+  private def parseQuery(query: String): Map[String, String] = {
     if (query == null) {
       return Map.empty[String, String]
     }
