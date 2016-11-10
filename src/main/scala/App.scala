@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 import java.util.concurrent.Executors
 
 import com.sun.net.httpserver.{HttpExchange, HttpHandler, HttpServer}
+import net.gpedro.integrations.slack.{SlackApi, SlackMessage}
 
 object App {
   val URL_INDEX = getClass.getClassLoader.getResource("index.html")
@@ -42,10 +43,10 @@ object App {
         params.get("btn") match {
           case Some(value) =>
             value match {
-              // TODO 出社
-              case "start" => println("this is start")
-              // TODO 退社
-              case "quit" => println("this is quit")
+              // 出社
+              case "start" => runStart()
+              // 退社
+              case "quit" => runQuit()
             }
           case None => // none
         }
@@ -58,6 +59,25 @@ object App {
     println(LocalDateTime.now().toString + " server stand up")
   }
 
+  private def runStart() = {
+    // Slack
+    // TODO 存在しないchName指定されるとタイムアウト
+    val slackApi = new SlackApi(Settings.slack.incomingWebHookURL)
+    val msg = "this is msg"
+    slackApi.call(new SlackMessage(Settings.slack.postChName, Settings.slack.userName, msg))
+
+    // TODO GAS : record monthly report
+  }
+
+  private def runQuit() = {
+    // TODO
+  }
+
+  /**
+    * TODO be implicit
+    *
+    * @param exchange
+    */
   private def redirectToIndex(exchange: HttpExchange): Unit = {
     exchange.getResponseHeaders.add("Location", "/index/")
     exchange.sendResponseHeaders(301, 0)
