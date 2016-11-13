@@ -6,6 +6,7 @@ import java.nio.charset.StandardCharsets
 import java.time.LocalDateTime
 import java.util.concurrent.Executors
 
+import com.example.controller.GoogleDriveController
 import com.sun.net.httpserver.{HttpExchange, HttpHandler, HttpServer}
 import net.gpedro.integrations.slack.{SlackApi, SlackMessage}
 
@@ -73,6 +74,7 @@ object App {
 
   private def runQuit() = {
     // TODO
+    GoogleDriveController.run()
   }
 
   /**

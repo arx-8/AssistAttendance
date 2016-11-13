@@ -34,7 +34,8 @@ object Settings {
   )
 
   case class GoogleDrive(
-      serviceAccountId: String
+      serviceAccountId: String,
+      spreadsheetId: String
   )
 
 }
