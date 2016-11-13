@@ -1,3 +1,5 @@
+package com.example
+
 import java.io.{BufferedReader, ByteArrayOutputStream, InputStream, InputStreamReader}
 import java.net.{InetSocketAddress, URLDecoder}
 import java.nio.charset.StandardCharsets
@@ -61,7 +63,7 @@ object App {
 
   private def runStart() = {
     // Slack
-    // TODO 存在しないchName指定されるとタイムアウト
+    // TODO 存在しないchName指定されるとHttpServerがタイムアウト
     val slackApi = new SlackApi(Settings.slack.incomingWebHookURL)
     val msg = "this is msg"
     slackApi.call(new SlackMessage(Settings.slack.postChName, Settings.slack.userName, msg))

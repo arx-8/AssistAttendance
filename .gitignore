@@ -25,4 +25,4 @@ project/plugins/project/
 
 # my
 *.lnk
-settings.json
+resources/

@@ -1,3 +1,5 @@
+package com.example
+
 import java.nio.charset.StandardCharsets
 
 import org.json4s.DefaultFormats
@@ -17,18 +19,22 @@ object Settings {
   private val values = JsonMethods.parse(jsonText).extract[Values]
 
   // for public props
-  val slack: Slack = values.slack
-
+  val slack = values.slack
+  val googleDrive = values.googleDrive
 
   /**
     * for json extract
     */
-  case class Values(slack: Slack)
+  case class Values(slack: Slack, googleDrive: GoogleDrive)
 
   case class Slack(
       incomingWebHookURL: String,
       userName: String,
       postChName: String
+  )
+
+  case class GoogleDrive(
+      serviceAccountId: String
   )
 
 }
