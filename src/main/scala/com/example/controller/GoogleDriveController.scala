@@ -12,6 +12,8 @@ import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.services.sheets.v4.{Sheets, SheetsScopes}
 
 import scala.collection.JavaConverters._
+import scala.util.control.Exception._
+import scala.util.{Failure, Success}
 
 object GoogleDriveController {
   private val JSON_FACTORY = JacksonFactory.getDefaultInstance.asInstanceOf[JsonFactory]
@@ -43,9 +45,6 @@ object GoogleDriveController {
       .setServiceAccountPrivateKeyFromP12File(p12file)
       .setServiceAccountScopes(SCOPES.asJava)
       .build()
-    println("DEBUG : refreshToken :" + credential.refreshToken())
-    println("AccessToken : " + credential.getAccessToken)
-    println("RefreshToken : " + credential.getRefreshToken)
 
     credential
   }
@@ -60,10 +59,15 @@ object GoogleDriveController {
   def run() = {
     val service = getSheetsService
 
-    val range = "Class Data!A2:E"
-    val resp = service.spreadsheets().values().get(Settings.googleDrive.spreadsheetId, range).execute()
+    val range = "2016_11!A2:E"
+    allCatch withTry {
+      service.spreadsheets().values().get(Settings.googleDrive.spreadsheetId, range).execute()
+    } match {
+      case Success(resp) =>
+        val values = resp.values()
+        print(values)
 
-    val values = resp.values()
-    println(values)
+      case Failure(t) => t.printStackTrace()
+    }
   }
 }
