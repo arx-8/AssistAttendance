@@ -62,6 +62,19 @@ object GoogleDriveController {
   private val COORD_COL_OF_END = 5
 
   def run() = {
+    // TODO
+    // validate系
+    // 　・ちゃんと*月度のシート参照できてるか
+    // 書き込む値
+    // 　・ex) 9:30, 18:00
+    // 　・いい感じに補正が必要、9:35 → 9:30、9:15 → 9:30、的な
+    // 書き込み先座標
+    // 　・COL　→　出社or退社
+    // 　・ROW　→　20日を先頭にして、現在日の差分日数で導出
+  }
+
+
+  def runExample() = {
     val service = getSheetsService
 
     // TODO フォーマットが月毎に差異が無いので、記入先の位置は計算で導出できそう
