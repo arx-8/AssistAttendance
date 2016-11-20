@@ -66,26 +66,10 @@ object GoogleDriveController {
 
     // TODO フォーマットが月毎に差異が無いので、記入先の位置は計算で導出できそう
 
-    // rangeは決め打ち
-    val sheetName = "2016_11" + "!"
-    val range = sheetName + "B5:F35"
-    allCatch withTry {
-      service.spreadsheets().values().get(Settings.googleDrive.spreadsheetId, range).execute()
-    } match {
-      case Success(resp) =>
-        val values = resp.values()
-        println(values)
-
-      case Failure(t) => t.printStackTrace()
-    }
-
     // WRITE
     val values = new util.ArrayList[CellData]()
     // 文字列書き込みで気持ち悪いけど、GAS側の時間計算は正しく通ってるのでとりあえずよし。だめならシリアル値導出にPOIのライブラリを使う？
-    values.add(new CellData()
-      .setUserEnteredValue(new ExtendedValue().setStringValue("18:30"))
-      .setUserEnteredFormat(new CellFormat().setNumberFormat(new NumberFormat().setType("DATE")))
-    )
+    values.add(new CellData().setUserEnteredValue(new ExtendedValue().setStringValue("18:30")))
 
     // 書き込み先座標 row=4, col=3 が20日の始業時間セル
     val writeCoord = new GridCoordinate()
@@ -109,9 +93,7 @@ object GoogleDriveController {
     requests.add(new Request()
       .setUpdateCells(
         new UpdateCellsRequest()
-          .setStart(
-            coord
-          )
+          .setStart(coord)
           .setRows(util.Arrays.asList(new RowData().setValues(values)))
           .setFields("userEnteredValue,userEnteredFormat.backgroundColor")
       )
@@ -128,4 +110,19 @@ object GoogleDriveController {
     * @return
     */
   private def getReportSheetId: Int = 6
+
+
+  private def readCellsExample(service: Sheets) = {
+    val sheetName = "2016_11" + "!"
+    val range = sheetName + "B5:F35"
+    allCatch withTry {
+      service.spreadsheets().values().get(Settings.googleDrive.spreadsheetId, range).execute()
+    } match {
+      case Success(resp) =>
+        val values = resp.values()
+        println(values)
+
+      case Failure(t) => t.printStackTrace()
+    }
+  }
 }
