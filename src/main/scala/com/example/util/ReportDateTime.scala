@@ -1,12 +1,14 @@
 package com.example.util
 
 import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
+
+import com.example.Consts
 
 /**
   * 勤怠報告用の日時を扱うクラス
   */
 class ReportDateTimeUtils(dt: LocalDateTime) {
-  val CLOSING_DAY_OF_MONTH = 20
 
   /**
     * 補正した時間を返す
@@ -31,14 +33,16 @@ class ReportDateTimeUtils(dt: LocalDateTime) {
   /**
     * 月度を返す(1～12)
     * 20日締め
+    * <pre>
     * e.g.
     * 11/20 → 11月度
     * 11/21 → 12月度
+    * </pre>
     *
     * @return
     */
   def getThisFiscalMonth: Int = {
-    if (CLOSING_DAY_OF_MONTH < dt.getDayOfMonth) {
+    if (Consts.CLOSING_DAY_OF_MONTH < dt.getDayOfMonth) {
       return dt.getMonthValue + 1
     }
     dt.getMonthValue
@@ -46,13 +50,26 @@ class ReportDateTimeUtils(dt: LocalDateTime) {
 
   /**
     * 月度の始めを基準にした日数を返す
-    * (e.g. 21日が月度開始日の場合)
+    * 20日締め、21日が月度開始日になる
+    * <pre>
+    * e.g. (10月度の場合)
+    * 10/21 -> 0
+    * 11/01 -> 11
+    * 11/20 -> 30
+    * </pre>
     *
     * @return
     */
-  def getDaysOfDiffFromBase: Int = {
-    // TODO
-    0
+  def getDayOfFiscalMonth: Int = {
+    // 「締め日～末日」なら、その日数分引いた数が月度の日数である
+    val dayOfMon = dt.getDayOfMonth
+    if (Consts.CLOSING_DAY_OF_MONTH < dayOfMon) {
+      return dayOfMon - Consts.CLOSING_DAY_OF_MONTH - 1
+    }
+
+    // 月度の最初の日を取得 -> get差分
+    val baseDt = dt.minusMonths(1).withDayOfMonth(Consts.CLOSING_DAY_OF_MONTH + 1)
+    ChronoUnit.DAYS.between(baseDt, dt).toInt
   }
 
   /**

@@ -10,4 +10,8 @@ object Consts {
   val PATH_SETTINGS_FILE = PATH_CURRENT_DIR + "resources\\settings.json"
   val PATH_GOOGLE_DRIVE_CLIENT_SECRET = PATH_CURRENT_DIR + "resources\\secret\\" + "client_secret.json"
   val PATH_GOOGLE_DRIVE_P12_KEY_FILE = PATH_CURRENT_DIR + "resources\\secret\\" + "key_file.p12"
+
+  // Report
+  /** 月の締め日 */
+  val CLOSING_DAY_OF_MONTH = 20
 }
