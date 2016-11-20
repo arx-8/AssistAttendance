@@ -21,12 +21,24 @@ class ReportDateTimeUtilsTest extends FunSuite {
   test("getThisFiscalMonth") {
     var dateTime = LocalDateTime.of(2016, 6, 20, 0, 0)
     var r = new ReportDateTimeUtils(dateTime)
-    println(dateTime.getDayOfMonth)
     assert(r.getThisFiscalMonth == 6)
 
     dateTime = LocalDateTime.of(2016, 11, 21, 0, 0)
     r = new ReportDateTimeUtils(dateTime)
-    println(dateTime.getDayOfMonth)
     assert(r.getThisFiscalMonth == 12)
+  }
+
+  test("getTimeOfJustToCorrect") {
+    var dateTime = LocalDateTime.of(2016, 1, 1, 8, 41)
+    var r = new ReportDateTimeUtils(dateTime)
+    assert(r.getTimeOfJustToCorrect == "9:00")
+
+    dateTime = LocalDateTime.of(2016, 1, 1, 9, 9)
+    r = new ReportDateTimeUtils(dateTime)
+    assert(r.getTimeOfJustToCorrect == "9:00")
+
+    dateTime = LocalDateTime.of(2016, 1, 1, 14, 11)
+    r = new ReportDateTimeUtils(dateTime)
+    assert(r.getTimeOfJustToCorrect == "14:30")
   }
 }

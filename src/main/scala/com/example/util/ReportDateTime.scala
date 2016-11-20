@@ -12,15 +12,20 @@ class ReportDateTimeUtils(dt: LocalDateTime) {
     * 補正した時間を返す
     * <pre>
     * (e.g.)
-    * 9:35 → 9:30
-    * 9:15 → 9:30
+    * 8:41 → 9:00
+    * 9:09 → 9:00
+    * 14:11 → 14:30
     * </pre>
     *
     * @return
     */
   def getTimeOfJustToCorrect: String = {
-    // TODO
-    ""
+    val pairHM = dt.getMinute match {
+      case min if (0 <= min && min <= 10) => (dt.getHour, 0)
+      case min if (10 < min && min < 40) => (dt.getHour, 30)
+      case _ => (dt.getHour + 1, 0)
+    }
+    pairHM._1 + ":" + "%02d".format(pairHM._2)
   }
 
   /**
