@@ -6,6 +6,8 @@ import java.time.LocalDateTime
   * 勤怠報告用の日時を扱うクラス
   */
 class ReportDateTimeUtils(dateTime: LocalDateTime) {
+  val CLOSING_DAY_OF_MONTH = 20
+
 
   /**
     * 補正した時間を返す
@@ -24,12 +26,18 @@ class ReportDateTimeUtils(dateTime: LocalDateTime) {
 
   /**
     * 月度を返す(1～12)
+    * 20日締め
+    * e.g.
+    * 11/20 → 11月度
+    * 11/21 → 12月度
     *
     * @return
     */
   def getThisFiscalMonth: Int = {
-    // TODO
-    0
+    if (CLOSING_DAY_OF_MONTH < dateTime.getDayOfMonth) {
+      return dateTime.getMonthValue + 1
+    }
+    dateTime.getMonthValue
   }
 
   /**

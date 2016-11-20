@@ -17,4 +17,16 @@ class ReportDateTimeUtilsTest extends FunSuite {
     val r = new ReportDateTimeUtils(dateTime)
     assert(r.getThisFiscalMonthsSheetName == "2016_06")
   }
+
+  test("getThisFiscalMonth") {
+    var dateTime = LocalDateTime.of(2016, 6, 20, 0, 0)
+    var r = new ReportDateTimeUtils(dateTime)
+    println(dateTime.getDayOfMonth)
+    assert(r.getThisFiscalMonth == 6)
+
+    dateTime = LocalDateTime.of(2016, 11, 21, 0, 0)
+    r = new ReportDateTimeUtils(dateTime)
+    println(dateTime.getDayOfMonth)
+    assert(r.getThisFiscalMonth == 12)
+  }
 }
