@@ -5,14 +5,15 @@ import java.time.LocalDateTime
 /**
   * 勤怠報告用の日時を扱うクラス
   */
-class ReportDateTimeUtils {
-  private val now = LocalDateTime.now()
+class ReportDateTimeUtils(dateTime: LocalDateTime) {
 
   /**
     * 補正した時間を返す
+    * <pre>
     * (e.g.)
     * 9:35 → 9:30
     * 9:15 → 9:30
+    * </pre>
     *
     * @return
     */
@@ -40,5 +41,13 @@ class ReportDateTimeUtils {
   def getDaysOfDiffFromBase: Int = {
     // TODO
     0
+  }
+
+  /**
+    * 今月度のシート名を、現在日付から導出して返す
+    * e.g. 2016_11
+    */
+  def getThisFiscalMonthsSheetName: String = {
+    dateTime.getYear.toString + "_" + "%02d".format(dateTime.getMonthValue)
   }
 }
