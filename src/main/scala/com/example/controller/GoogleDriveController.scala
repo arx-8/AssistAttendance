@@ -57,6 +57,10 @@ object GoogleDriveController {
       .build()
   }
 
+  /** 始業と就業時間の列INDEX */
+  private val COORD_COL_OF_START = 3
+  private val COORD_COL_OF_END = 5
+
   def run() = {
     val service = getSheetsService
 
@@ -75,12 +79,22 @@ object GoogleDriveController {
       case Failure(t) => t.printStackTrace()
     }
 
-    // update
+    // WRITE
     val values = new util.ArrayList[CellData]()
-    values.add(new CellData().setUserEnteredValue(new ExtendedValue().setStringValue("HELLO WORLD")))
+    // 文字列書き込みで気持ち悪いけど、GAS側の時間計算は正しく通ってるのでとりあえずよし。だめならシリアル値導出にPOIのライブラリを使う？
+    values.add(new CellData()
+      .setUserEnteredValue(new ExtendedValue().setStringValue("18:30"))
+      .setUserEnteredFormat(new CellFormat().setNumberFormat(new NumberFormat().setType("DATE")))
+    )
+
+    // 書き込み先座標 row=4, col=3 が20日の始業時間セル
+    val writeCoord = new GridCoordinate()
+      .setSheetId(getReportSheetId)
+      .setRowIndex(4)
+      .setColumnIndex(COORD_COL_OF_START)
 
     allCatch withTry {
-      writeCell(service, values)
+      writeCell(service, values, writeCoord)
     } match {
       case Success(resp) =>
         println(resp)
@@ -90,16 +104,13 @@ object GoogleDriveController {
     println("end")
   }
 
-  private def writeCell(service: Sheets, values: util.List[CellData]) = {
+  private def writeCell(service: Sheets, values: util.List[CellData], coord: GridCoordinate) = {
     val requests = new util.ArrayList[Request]()
     requests.add(new Request()
       .setUpdateCells(
         new UpdateCellsRequest()
           .setStart(
-            new GridCoordinate()
-              .setSheetId(getReportSheetId)
-              .setRowIndex(0)
-              .setColumnIndex(0)
+            coord
           )
           .setRows(util.Arrays.asList(new RowData().setValues(values)))
           .setFields("userEnteredValue,userEnteredFormat.backgroundColor")
