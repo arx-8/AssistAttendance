@@ -27,7 +27,7 @@ object GoogleDriveController {
     *
     * @return
     */
-  private def authorize(): Credential = {
+  private def authorize: Credential = {
     val p12file = new File(Consts.PATH_GOOGLE_DRIVE_P12_KEY_FILE)
     if (!p12file.exists) {
       throw new FileNotFoundException("Failed to load : " + Consts.PATH_GOOGLE_DRIVE_P12_KEY_FILE)
@@ -45,7 +45,7 @@ object GoogleDriveController {
   }
 
   private def getSheetsService: Sheets = {
-    val credential = authorize()
+    val credential = authorize
     new Sheets.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential)
       .setApplicationName(Consts.APPLICATION_NAME)
       .build()
@@ -55,6 +55,7 @@ object GoogleDriveController {
   private val COORD_COL_OF_START = 3
   private val COORD_COL_OF_END = 5
   private val COORD_ROW_OF_DAYS_HEAD = 4
+  private val FISCAL_MONTHS_IN_SHEET_RANGE_FORMAT = "%s!F1"
 
   /**
     * @param isStart true:出社 | false:退社
@@ -66,8 +67,7 @@ object GoogleDriveController {
 
     // Validate
     // ・ちゃんと今月度のシート参照できてるか
-    val fiscalMonthsInSheetRange = now.getThisFiscalMonthsSheetName + "!" + "F1"
-    val maybeValues = sheetDao.readCells(fiscalMonthsInSheetRange)
+    val maybeValues = sheetDao.readCells(FISCAL_MONTHS_IN_SHEET_RANGE_FORMAT.format(now.getThisFiscalMonthsSheetName))
     maybeValues match {
       case Some(values) =>
         // 範囲1セルgetなので、決め打ちで取得

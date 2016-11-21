@@ -11,8 +11,8 @@ import com.sun.net.httpserver.{HttpExchange, HttpHandler, HttpServer}
 import net.gpedro.integrations.slack.{SlackApi, SlackMessage}
 import org.apache.http.HttpStatus
 
-import scala.util.Failure
 import scala.util.control.Exception
+import scala.util.{Failure, Success}
 
 object App {
   val URL_INDEX = getClass.getClassLoader.getResource("index.html")
@@ -83,6 +83,7 @@ object App {
     Exception.allCatch withTry {
       GoogleDriveController.run(true)
     } match {
+      case Success(any) => println("出社処理が完了しました。")
       case Failure(t) => println(t.getMessage)
     }
   }
@@ -97,6 +98,7 @@ object App {
     Exception.allCatch withTry {
       GoogleDriveController.run(false)
     } match {
+      case Success(any) => println("出社処理が完了しました。")
       case Failure(t) => println(t.getMessage)
     }
   }
