@@ -11,7 +11,7 @@ import com.example.Consts
 class ReportDateTimeUtils(dt: LocalDateTime) {
 
   /**
-    * 補正した時間を返す
+    * ちょうどよく補正した時間を返す
     * <pre>
     * (e.g.)
     * 8:41 → 9:00
@@ -21,7 +21,7 @@ class ReportDateTimeUtils(dt: LocalDateTime) {
     *
     * @return
     */
-  def getTimeOfJustToCorrect: String = {
+  def getTimeOfJust: String = {
     val pairHM = dt.getMinute match {
       case min if (0 <= min && min <= 10) => (dt.getHour, 0)
       case min if (10 < min && min < 40) => (dt.getHour, 30)

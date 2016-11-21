@@ -6,15 +6,13 @@ import org.scalatest.FunSuite
 
 class ReportDateTimeUtilsTest extends FunSuite {
 
-  test("getThisFiscalMonthsSheetName month 10~12") {
-    val dateTime = LocalDateTime.of(2016, 11, 20, 0, 0)
-    val r = new ReportDateTimeUtils(dateTime)
+  test("getThisFiscalMonthsSheetName") {
+    var dateTime = LocalDateTime.of(2016, 11, 20, 0, 0)
+    var r = new ReportDateTimeUtils(dateTime)
     assert(r.getThisFiscalMonthsSheetName == "2016_11")
-  }
 
-  test("getThisFiscalMonthsSheetName month 1~9") {
-    val dateTime = LocalDateTime.of(2016, 6, 1, 0, 0)
-    val r = new ReportDateTimeUtils(dateTime)
+    dateTime = LocalDateTime.of(2016, 6, 1, 0, 0)
+    r = new ReportDateTimeUtils(dateTime)
     assert(r.getThisFiscalMonthsSheetName == "2016_06")
   }
 
@@ -28,18 +26,18 @@ class ReportDateTimeUtilsTest extends FunSuite {
     assert(r.getThisFiscalMonth == 12)
   }
 
-  test("getTimeOfJustToCorrect") {
+  test("getTimeOfJust") {
     var dateTime = LocalDateTime.of(2016, 1, 1, 8, 41)
     var r = new ReportDateTimeUtils(dateTime)
-    assert(r.getTimeOfJustToCorrect == "9:00")
+    assert(r.getTimeOfJust == "9:00")
 
     dateTime = LocalDateTime.of(2016, 1, 1, 9, 9)
     r = new ReportDateTimeUtils(dateTime)
-    assert(r.getTimeOfJustToCorrect == "9:00")
+    assert(r.getTimeOfJust == "9:00")
 
     dateTime = LocalDateTime.of(2016, 1, 1, 14, 11)
     r = new ReportDateTimeUtils(dateTime)
-    assert(r.getTimeOfJustToCorrect == "14:30")
+    assert(r.getTimeOfJust == "14:30")
   }
 
   test("getDayOfFiscalMonth") {
