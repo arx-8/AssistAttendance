@@ -77,6 +77,6 @@ class ReportDateTimeUtils(dt: LocalDateTime) {
     * e.g. 2016_11
     */
   def getThisFiscalMonthsSheetName: String = {
-    dt.getYear.toString + "_" + "%02d".format(dt.getMonthValue)
+    dt.getYear.toString + "_" + "%02d".format(getThisFiscalMonth)
   }
 }
