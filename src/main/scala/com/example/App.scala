@@ -9,6 +9,10 @@ import java.util.concurrent.Executors
 import com.example.controller.GoogleDriveController
 import com.sun.net.httpserver.{HttpExchange, HttpHandler, HttpServer}
 import net.gpedro.integrations.slack.{SlackApi, SlackMessage}
+import org.apache.http.HttpStatus
+
+import scala.util.Failure
+import scala.util.control.Exception
 
 object App {
   val URL_INDEX = getClass.getClassLoader.getResource("index.html")
@@ -29,7 +33,7 @@ object App {
     server.createContext("/index/", new HttpHandler {
       override def handle(exchange: HttpExchange): Unit = {
         val buf = convertByteArray(URL_INDEX.openStream())
-        exchange.sendResponseHeaders(200, buf.length)
+        exchange.sendResponseHeaders(HttpStatus.SC_OK, buf.length)
         exchange.getResponseBody.write(buf)
         exchange.getResponseBody.close()
       }
@@ -62,6 +66,12 @@ object App {
     println(LocalDateTime.now().toString + " server stand up")
   }
 
+  /**
+    * 出社の処理。
+    * つぶやいて、時間記録
+    *
+    * @return
+    */
   private def runStart() = {
     // Slack
     // TODO 存在しないchName指定されるとHttpServerがタイムアウト
@@ -69,12 +79,26 @@ object App {
     val msg = "this is msg"
     slackApi.call(new SlackMessage(Settings.slack.postChName, Settings.slack.userName, msg))
 
-    // TODO GAS : record monthly report
+    // GoogleSpreadsheets
+    Exception.allCatch withTry {
+      GoogleDriveController.run(true)
+    } match {
+      case Failure(t) => println(t.getMessage)
+    }
   }
 
+  /**
+    * 退社の処理。
+    * 時間記録だけ。
+    *
+    * @return
+    */
   private def runQuit() = {
-    // TODO
-    GoogleDriveController.run()
+    Exception.allCatch withTry {
+      GoogleDriveController.run(false)
+    } match {
+      case Failure(t) => println(t.getMessage)
+    }
   }
 
   /**
@@ -84,7 +108,7 @@ object App {
     */
   private def redirectToIndex(exchange: HttpExchange): Unit = {
     exchange.getResponseHeaders.add("Location", "/index/")
-    exchange.sendResponseHeaders(301, 0)
+    exchange.sendResponseHeaders(HttpStatus.SC_MOVED_PERMANENTLY, 0)
     exchange.getResponseBody.close()
   }
 

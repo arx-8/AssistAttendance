@@ -1,8 +1,11 @@
 package com.example.controller
 
 import java.io.{File, FileNotFoundException}
+import java.time.LocalDateTime
 import java.util
 
+import com.example.dao.GoogleSpreadsheetsDao
+import com.example.util.ReportDateTimeUtils
 import com.example.{Consts, Settings}
 import com.google.api.client.auth.oauth2.Credential
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential
@@ -57,20 +60,43 @@ object GoogleDriveController {
       .build()
   }
 
-  /** 始業と就業時間の列INDEX */
+  /** 始業と就業時間の行列INDEX */
   private val COORD_COL_OF_START = 3
   private val COORD_COL_OF_END = 5
+  private val COORD_ROW_OF_DAYS_HEAD = 4
 
-  def run() = {
-    // TODO
-    // validate系
-    // 　・ちゃんと*月度のシート参照できてるか
-    // 書き込む値
-    // 　・ex) 9:30, 18:00
-    // 　・いい感じに補正が必要、9:35 → 9:30、9:15 → 9:30、的な
-    // 書き込み先座標
-    // 　・COL　→　出社or退社
-    // 　・ROW　→　20日を先頭にして、現在日の差分日数で導出
+  /**
+    *
+    * @param isStart true:出社 | false:退社
+    * @return
+    */
+  def run(isStart: Boolean) = {
+    val sheetDao = new GoogleSpreadsheetsDao(getSheetsService)
+    val now = new ReportDateTimeUtils(LocalDateTime.now)
+
+    // Validate
+    // ・ちゃんと今月度のシート参照できてるか
+    val fiscalMonthsInSheetRange = now.getThisFiscalMonthsSheetName + "!" + "F1"
+    val maybeValues = sheetDao.readCells(fiscalMonthsInSheetRange)
+    maybeValues match {
+      case Some(values) =>
+        // 範囲1セルgetなので、決め打ちで取得
+        val fisMon = values.getValues.get(0).get(0).toString
+        if (fisMon != now.getThisFiscalMonth.toString) {
+          throw new AccessFailException("今月度のシートじゃないっぽい。デバッグ値：" + fisMon)
+        }
+      case None =>
+        throw new AccessFailException("月度シートアクセスに失敗")
+    }
+
+    // 書き込み
+    // 文字列書き込みで気持ち悪いけど、GAS側の時間計算は正しく通ってるのでとりあえずよし。だめならシリアル値導出にPOIのライブラリを使う？
+    val writeCell = new CellData().setUserEnteredValue(new ExtendedValue().setStringValue(now.getTimeOfJust))
+    val writeCoord = new GridCoordinate()
+      .setSheetId(getReportSheetId)
+      .setRowIndex(COORD_ROW_OF_DAYS_HEAD + now.getDayOfFiscalMonth)
+      .setColumnIndex(if (isStart) COORD_COL_OF_START else COORD_COL_OF_END)
+    sheetDao.writeCell(writeCell, writeCoord)
   }
 
 
@@ -117,13 +143,12 @@ object GoogleDriveController {
   }
 
   /**
-    * https://docs.google.com/spreadsheets/d/SPREADSHEET_ID/edit#gid={ここがSheetId！}
+    * https://docs.google.com/spreadsheets/d/{SPREADSHEET_ID}/edit#gid={ここがSheetId！}
     * TODO 現状一定みたいだけど、不定なわけがないので、動的に取得しないと
     *
     * @return
     */
   private def getReportSheetId: Int = 6
-
 
   private def readCellsExample(service: Sheets) = {
     val sheetName = "2016_11" + "!"
@@ -138,4 +163,10 @@ object GoogleDriveController {
       case Failure(t) => t.printStackTrace()
     }
   }
+
+  /**
+    * TODO なんかもっと良い感じで
+    */
+  class AccessFailException(message: String = null) extends Exception(message) {}
+
 }
