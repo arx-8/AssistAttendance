@@ -16,19 +16,10 @@ import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.services.sheets.v4.model._
 import com.google.api.services.sheets.v4.{Sheets, SheetsScopes}
 
-import scala.util.control.Exception._
-import scala.util.{Failure, Success}
-
 object GoogleDriveController {
   private val JSON_FACTORY = JacksonFactory.getDefaultInstance.asInstanceOf[JsonFactory]
   private val SCOPES = util.Arrays.asList(SheetsScopes.SPREADSHEETS)
-  private val HTTP_TRANSPORT = try {
-    GoogleNetHttpTransport.newTrustedTransport().asInstanceOf[HttpTransport]
-  } catch {
-    case t: Throwable =>
-      t.printStackTrace()
-      sys.exit()
-  }
+  private val HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport().asInstanceOf[HttpTransport]
 
   /**
     * TODO 公式のサンプルコードが動かないので、古い認証方法を使ってる。
@@ -66,7 +57,6 @@ object GoogleDriveController {
   private val COORD_ROW_OF_DAYS_HEAD = 4
 
   /**
-    *
     * @param isStart true:出社 | false:退社
     * @return
     */
@@ -86,7 +76,7 @@ object GoogleDriveController {
           throw new AccessFailException("今月度のシートじゃないっぽい。デバッグ値：" + fisMon)
         }
       case None =>
-        throw new AccessFailException("月度シートアクセスに失敗")
+        throw new AccessFailException("月度シートアクセスに失敗。設定したspreadsheetIdが、正しく今月度の月報のものか確認してください。")
     }
 
     // 書き込み
@@ -99,49 +89,6 @@ object GoogleDriveController {
     sheetDao.writeCell(writeCell, writeCoord)
   }
 
-
-  def runExample() = {
-    val service = getSheetsService
-
-    // TODO フォーマットが月毎に差異が無いので、記入先の位置は計算で導出できそう
-
-    // WRITE
-    val values = new util.ArrayList[CellData]()
-    // 文字列書き込みで気持ち悪いけど、GAS側の時間計算は正しく通ってるのでとりあえずよし。だめならシリアル値導出にPOIのライブラリを使う？
-    values.add(new CellData().setUserEnteredValue(new ExtendedValue().setStringValue("18:30")))
-
-    // 書き込み先座標 row=4, col=3 が20日の始業時間セル
-    val writeCoord = new GridCoordinate()
-      .setSheetId(getReportSheetId)
-      .setRowIndex(4)
-      .setColumnIndex(COORD_COL_OF_START)
-
-    allCatch withTry {
-      writeCell(service, values, writeCoord)
-    } match {
-      case Success(resp) =>
-        println(resp)
-
-      case Failure(t) => t.printStackTrace()
-    }
-    println("end")
-  }
-
-  private def writeCell(service: Sheets, values: util.List[CellData], coord: GridCoordinate) = {
-    val requests = new util.ArrayList[Request]()
-    requests.add(new Request()
-      .setUpdateCells(
-        new UpdateCellsRequest()
-          .setStart(coord)
-          .setRows(util.Arrays.asList(new RowData().setValues(values)))
-          .setFields("userEnteredValue,userEnteredFormat.backgroundColor")
-      )
-    )
-
-    val batchUpdateRequest = new BatchUpdateSpreadsheetRequest().setRequests(requests)
-    service.spreadsheets().batchUpdate(Settings.googleDrive.spreadsheetId, batchUpdateRequest).execute()
-  }
-
   /**
     * https://docs.google.com/spreadsheets/d/{SPREADSHEET_ID}/edit#gid={ここがSheetId！}
     * TODO 現状一定みたいだけど、不定なわけがないので、動的に取得しないと
@@ -149,20 +96,6 @@ object GoogleDriveController {
     * @return
     */
   private def getReportSheetId: Int = 6
-
-  private def readCellsExample(service: Sheets) = {
-    val sheetName = "2016_11" + "!"
-    val range = sheetName + "B5:F35"
-    allCatch withTry {
-      service.spreadsheets().values().get(Settings.googleDrive.spreadsheetId, range).execute()
-    } match {
-      case Success(resp) =>
-        val values = resp.values()
-        println(values)
-
-      case Failure(t) => t.printStackTrace()
-    }
-  }
 
   /**
     * TODO なんかもっと良い感じで
