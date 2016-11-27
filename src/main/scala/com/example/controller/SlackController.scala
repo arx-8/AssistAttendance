@@ -3,6 +3,7 @@ package com.example.controller
 import akka.actor.ActorSystem
 import ch.qos.logback.classic.LoggerContext
 import com.example.Settings
+import com.typesafe.config.{ConfigFactory, ConfigValueFactory}
 import org.slf4j.LoggerFactory
 import slack.rtm.SlackRtmClient
 
@@ -11,7 +12,10 @@ import scala.language.postfixOps
 object SlackController {
   suppressLogging()
 
-  implicit val system = ActorSystem("slack")
+  private val config = ConfigFactory.load()
+    .withValue("akka.loglevel", ConfigValueFactory.fromAnyRef("OFF"))
+    .withValue("akka.stdout-loglevel", ConfigValueFactory.fromAnyRef("OFF"))
+  implicit val system = ActorSystem("slack", config)
   implicit val ec = system.dispatcher
 
   val client = SlackRtmClient(Settings.slack.token)
