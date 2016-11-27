@@ -62,7 +62,7 @@ object App {
     })
 
     server.start()
-    println(LocalDateTime.now().toString + " server stand up")
+    println(LocalDateTime.now().toString + " server awakening")
   }
 
   /**

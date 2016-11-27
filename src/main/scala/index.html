@@ -11,5 +11,25 @@
     <button type="submit" name="btn" value="start">出社</button>
     <button type="submit" name="btn" value="quit">退社</button>
 </form>
+<script>
+    window.onload = function () {
+        /**
+         * 2重サブミット防止用
+         * フラグブロックより、disabledにしたいが、disabledにするとform submitがうまく飛ばなくなる
+         */
+        let isSubmit = false;
+        const btns = document.querySelectorAll('[name = "btn"]');
+        Array.prototype.forEach.call(btns, (btn) => {
+            btn.onclick = () => {
+                if (!isSubmit) {
+                    isSubmit = true;
+                    return true;
+                }
+                alert("2重サブミット防止。処理中...");
+                return false;
+            };
+        });
+    }
+</script>
 </body>
 </html>
