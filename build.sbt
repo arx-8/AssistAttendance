@@ -21,3 +21,13 @@ libraryDependencies += "org.scalatest" % "scalatest_2.11" % "3.0.1"
 
 // https://github.com/gilbertw1/slack-scala-client
 libraryDependencies += "com.github.gilbertw1" %% "slack-scala-client" % "0.1.8"
+
+assemblyMergeStrategy in assembly := {
+  case PathList(ps@_*) if ps.last endsWith ".properties" => MergeStrategy.first
+  case PathList(ps@_*) if ps.last endsWith ".class" => MergeStrategy.first
+  case "application.conf" => MergeStrategy.concat
+  case "unwanted.txt" => MergeStrategy.discard
+  case x =>
+    val oldStrategy = (assemblyMergeStrategy in assembly).value
+    oldStrategy(x)
+}
