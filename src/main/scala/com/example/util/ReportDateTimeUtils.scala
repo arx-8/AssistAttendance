@@ -12,6 +12,7 @@ class ReportDateTimeUtils(dt: LocalDateTime) {
 
   /**
     * ちょうどよく補正した時間を返す
+    * TODO  日跨ぎ対応。めったにないから放置。
     * <pre>
     * (e.g.)
     * 8:41 → 9:00
