@@ -73,7 +73,6 @@ object App {
     */
   private def runStart() = {
     // Slack
-    // TODO 存在しないchName指定されるとHttpServerがタイムアウト
     SlackController.sendMessage("おはようございます。出社しました。")
 
     // GoogleSpreadsheets

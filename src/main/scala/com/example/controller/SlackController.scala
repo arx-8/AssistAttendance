@@ -23,7 +23,13 @@ object SlackController {
   // これがないと、初回のsendMessageが失敗する？
   Thread.sleep(5000L)
 
-  private val channelId = client.state.getChannelIdForName(Settings.slack.postChName).get
+  private val channelId = {
+    val temp = client.state.getChannelIdForName(Settings.slack.postChName)
+    temp match {
+      case Some(chId) => chId
+      case None => throw new NoSuchElementException("Slackのチャンネル名「" + Settings.slack.postChName + "」が見つかりませんでした。")
+    }
+  }
 
   def sendMessage(text: String) = {
     client.sendMessage(channelId, text)
