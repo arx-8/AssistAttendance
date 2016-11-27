@@ -28,8 +28,7 @@ object Settings {
   case class Values(slack: Slack, googleDrive: GoogleDrive)
 
   case class Slack(
-      incomingWebHookURL: String,
-      userName: String,
+      token: String,
       postChName: String
   )
 

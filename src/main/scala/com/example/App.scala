@@ -6,9 +6,8 @@ import java.nio.charset.StandardCharsets
 import java.time.LocalDateTime
 import java.util.concurrent.Executors
 
-import com.example.controller.GoogleDriveController
+import com.example.controller.{GoogleDriveController, SlackController}
 import com.sun.net.httpserver.{HttpExchange, HttpHandler, HttpServer}
-import net.gpedro.integrations.slack.{SlackApi, SlackMessage}
 import org.apache.http.HttpStatus
 
 import scala.util.control.Exception
@@ -75,9 +74,7 @@ object App {
   private def runStart() = {
     // Slack
     // TODO 存在しないchName指定されるとHttpServerがタイムアウト
-    val slackApi = new SlackApi(Settings.slack.incomingWebHookURL)
-    val msg = "this is msg"
-    slackApi.call(new SlackMessage(Settings.slack.postChName, Settings.slack.userName, msg))
+    SlackController.sendMessage("おはようございます。出社しました。")
 
     // GoogleSpreadsheets
     Exception.allCatch withTry {
@@ -98,7 +95,7 @@ object App {
     Exception.allCatch withTry {
       GoogleDriveController.run(false)
     } match {
-      case Success(any) => println("出社処理が完了しました。")
+      case Success(any) => println("退社処理が完了しました。")
       case Failure(t) => println(t.getMessage)
     }
   }
